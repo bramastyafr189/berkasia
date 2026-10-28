@@ -92,3 +92,20 @@ test('all animated steps match each tool in both languages',async({page})=>{
   }
  }
 });
+
+test('manage PDF loads documents with transparency, vector drawings, and annotations without createElement error', async ({ page }) => {
+  const doc = await PDFDocument.create(), font = await doc.embedFont(StandardFonts.Helvetica);
+  const p1 = doc.addPage([300, 300]);
+  p1.drawText('Complex PDF Page', { x: 30, y: 250, font });
+  const image = await doc.embedPng(png);
+  p1.drawImage(image, { x: 30, y: 50, width: 60, height: 60, opacity: 0.5 });
+  const field = doc.getForm().createTextField('testfield');
+  field.setText('Sample');
+  field.addToPage(p1, { x: 30, y: 150, width: 120, height: 25 });
+  const bytes = Buffer.from(await doc.save({ useObjectStreams: false }));
+
+  await page.getByRole('button', { name: 'Kelola PDF' }).click();
+  await page.locator('#pdf-start').setInputFiles(upload('complex.pdf', 'application/pdf', bytes));
+  await expect(page.getByText('1 halaman', { exact: true })).toBeVisible();
+  await expect(page.locator('#pdf-message')).toBeHidden();
+});

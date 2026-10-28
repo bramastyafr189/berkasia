@@ -3,12 +3,114 @@ import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { PDFDocument, degrees } from 'pdf-lib';
 import JSZip from 'jszip';
 
+// Polyfill minimal document environment for pdfjs-dist in a Web Worker context.
+if (typeof self.document === 'undefined') {
+  const createMockElement = (tag = 'div') => ({
+    tagName: tag.toUpperCase(),
+    nodeName: tag.toUpperCase(),
+    style: {},
+    setAttribute() {},
+    getAttribute() { return null; },
+    removeAttribute() {},
+    append() {},
+    appendChild() {},
+    remove() {},
+    removeChild() {},
+    children: [],
+    childNodes: [],
+    getElementsByTagName() { return []; },
+    sheet: { insertRule() {}, deleteRule() {}, cssRules: [] },
+  });
+
+  const head = createMockElement('head');
+  const body = createMockElement('body');
+  const documentElement = {
+    ...createMockElement('html'),
+    getElementsByTagName(name) {
+      if (name.toLowerCase() === 'head') return [head];
+      if (name.toLowerCase() === 'body') return [body];
+      return [];
+    }
+  };
+
+  self.document = {
+    fonts: self.fonts,
+    createElement(tag) {
+      if (tag === 'canvas') {
+        const c = new OffscreenCanvas(1, 1);
+        c.style = {};
+        return c;
+      }
+      return createMockElement(tag);
+    },
+    createElementNS(ns, tag) {
+      if (tag === 'canvas') {
+        const c = new OffscreenCanvas(1, 1);
+        c.style = {};
+        return c;
+      }
+      return createMockElement(tag);
+    },
+    documentElement,
+    head,
+    body,
+    getElementsByTagName(name) {
+      return documentElement.getElementsByTagName(name);
+    }
+  };
+}
+
+class WorkerCanvasFactory {
+  create(width, height) {
+    if (width <= 0 || height <= 0) throw new Error('Invalid canvas size');
+    const canvas = new OffscreenCanvas(Math.max(1, Math.round(width)), Math.max(1, Math.round(height)));
+    canvas.style = {};
+    return {
+      canvas,
+      context: canvas.getContext('2d', { willReadFrequently: true })
+    };
+  }
+  reset(canvasAndContext, width, height) {
+    if (!canvasAndContext?.canvas) throw new Error('Canvas is not specified');
+    canvasAndContext.canvas.width = Math.max(1, Math.round(width));
+    canvasAndContext.canvas.height = Math.max(1, Math.round(height));
+  }
+  destroy(canvasAndContext) {
+    if (canvasAndContext?.canvas) {
+      canvasAndContext.canvas.width = 0;
+      canvasAndContext.canvas.height = 0;
+      canvasAndContext.canvas = null;
+      canvasAndContext.context = null;
+    }
+  }
+}
+
+class WorkerFilterFactory {
+  addFilter() { return 'none'; }
+  addHCMFilter() { return 'none'; }
+  addAlphaFilter() { return 'none'; }
+  addLuminosityFilter() { return 'none'; }
+  addKnockoutFilter() { return 'none'; }
+  addHighlightHCMFilter() { return 'none'; }
+  addSelectionHCMFilter() { return 'none'; }
+  addSelectionFilter() { return 'none'; }
+  createSelectionStyle() { return null; }
+  destroy() {}
+}
+
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
 const sources = new Map();
 const types = { JPEG: 'image/jpeg', PNG: 'image/png', WEBP: 'image/webp' };
 const report = (id, progress) => self.postMessage({ id, progress });
 async function loadPDF(bytes) {
-  try { return await pdfjs.getDocument({ data: bytes.slice() }).promise; }
+  try {
+    return await pdfjs.getDocument({
+      data: bytes.slice(),
+      ownerDocument: self.document,
+      CanvasFactory: WorkerCanvasFactory,
+      FilterFactory: WorkerFilterFactory,
+    }).promise;
+  }
   catch { throw new Error('PDF rusak atau dilindungi kata sandi.'); }
 }
 async function imageCanvas(file, maxSize) {
