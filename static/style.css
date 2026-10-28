@@ -7,3 +7,150 @@
 .pdf-upload[hidden]{display:none}
 .nav-item:disabled{opacity:.5;cursor:wait}button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid #739b55;outline-offset:2px}@media(max-width:370px){.target-row{align-items:flex-start;flex-direction:column}.nav-item{font-size:12px;padding:9px 7px}.input-wrap,.format-row select{width:100%}}
 .pdf-note[hidden]{display:none}
+@media (max-width: 600px) {
+  .page-actions button { min-width: 40px; min-height: 40px; }
+  .nav-item { min-height: 44px; }
+}
+
+/* Motion stays subtle and never delays an action or hides its content. */
+@keyframes enter-soft { from { opacity:0; transform:translateY(14px) } to { opacity:1; transform:translateY(0) } }
+@keyframes spin-soft { to { transform:rotate(360deg) } }
+@keyframes check-in { from { opacity:0; transform:scale(.75) } to { opacity:1; transform:scale(1) } }
+@media (prefers-reduced-motion: no-preference) {
+  .header { animation:enter-soft .85s cubic-bezier(.22,1,.36,1) both }
+  .intro { animation:enter-soft .95s .05s cubic-bezier(.22,1,.36,1) both }
+  .workspace:not([hidden]) { animation:enter-soft 1s .12s cubic-bezier(.22,1,.36,1) both }
+  .benefits { animation:enter-soft 1s .2s cubic-bezier(.22,1,.36,1) both }
+  .brand-icon,.upload-icon,.card-icon,.benefit-icon,.choose,.nav-item,.small-button,.submit,.download,.download-all,.page-card,.page-actions button,.source-choice,.input-wrap,.format-row select { transition:transform .42s cubic-bezier(.22,1,.36,1), background-color .42s ease, border-color .42s ease, box-shadow .42s ease, color .42s ease }
+  .brand:hover .brand-icon { transform:rotate(-8deg) scale(1.06) }
+  .dropzone:hover .upload-icon,.dropzone.drag .upload-icon { transform:translateY(-4px) }
+  .dropzone.drag { box-shadow:0 0 0 4px #cce8b066 }
+  .nav-item:hover:not(:disabled),.small-button:hover:not(:disabled),.page-actions button:hover:not(:disabled),.source-choice:hover { background:#edf6e6; border-color:#bad6a8 }
+  .submit:hover:not(:disabled),.download:hover,.download-all:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 6px 16px #234b3426 }
+  .submit:disabled::after,.download-all:disabled::after { content:''; width:14px; height:14px; border:2px solid currentColor; border-right-color:transparent; border-radius:50%; animation:spin-soft 1.25s linear infinite; flex-shrink:0 }
+  .result-check { animation:check-in .7s .1s cubic-bezier(.22,1,.36,1) both }
+  .page-card:hover { border-color:#bed5b1; box-shadow:0 5px 18px #234b3412 }
+  .page-preview img { transition:transform .7s cubic-bezier(.22,1,.36,1) }
+  .page-card.dragging { transform:scale(.97) }
+  .source-choice:has(input:checked) { background:#edf7e6; border-color:#83ad6a; box-shadow:0 0 0 2px #d8ebcb }
+  dialog[open]::backdrop { animation:backdrop-in .45s ease both }
+  @keyframes backdrop-in { from { opacity:0 } to { opacity:1 } }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,*::before,*::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; scroll-behavior:auto !important }
+}
+/* Controls share the same appearance across devices. */
+.format-row{margin-top:24px}
+.native-select{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;overflow:hidden!important}
+.custom-select{position:relative;min-width:135px;flex-shrink:0}
+.select-trigger{width:100%;min-height:44px;padding:0 13px;border:1px solid #dfe9d9;border-radius:9px;background:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px;color:#263e2e;font:700 12px 'DM Sans',sans-serif;text-align:left;cursor:pointer;transition:border-color .35s,box-shadow .35s,background-color .35s}
+.select-trigger:hover,.select-trigger[aria-expanded="true"]{border-color:#9ebd8a;box-shadow:0 0 0 3px #eaf3e3}
+.select-trigger:disabled{opacity:.55;cursor:wait}
+.select-arrow{font-size:19px;color:#759369;line-height:1;transition:transform .35s}
+.select-trigger[aria-expanded="true"] .select-arrow{transform:rotate(180deg)}
+.select-options{position:absolute;z-index:10;top:calc(100% + 6px);right:0;min-width:100%;padding:5px;background:#fff;border:1px solid #e0e9dc;border-radius:10px;box-shadow:0 12px 30px #234b3420}
+.select-options[hidden]{display:none}
+.select-option{display:block;width:100%;border:0;border-radius:6px;background:none;padding:10px 11px;font:600 12px 'DM Sans',sans-serif;color:#48634c;text-align:left;cursor:pointer;white-space:nowrap}
+.select-option:hover,.select-option:focus-visible,.select-option[aria-selected="true"]{background:#edf6e6;color:#234b34}
+.input-wrap{padding:0 4px 0 12px;gap:3px}.input-wrap input{appearance:textfield;-moz-appearance:textfield}.input-wrap input::-webkit-inner-spin-button,.input-wrap input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.input-wrap .custom-select{min-width:54px}.input-wrap .select-trigger{min-height:34px;border:0;background:#f2f7ed;padding:0 7px;gap:3px}.input-wrap .select-arrow{font-size:15px}
+.source-choice input[type="checkbox"],.source-choice input[type="radio"]{appearance:none;width:18px;height:18px;border:1.5px solid #a7bba0;background:white;display:grid;place-items:center;margin:0;cursor:pointer}.source-choice input[type="checkbox"]{border-radius:5px}.source-choice input[type="radio"]{border-radius:50%}.source-choice input:checked{background:#315b37;border-color:#315b37}.source-choice input:checked::after{content:'✓';color:white;font-size:12px;line-height:1}.source-choice input[type="radio"]:checked::after{content:'';width:6px;height:6px;background:white;border-radius:50%}
+.language-switch{display:flex;gap:2px;padding:3px;border-radius:9px;background:#edf2e9}.language-switch button{border:0;border-radius:6px;padding:7px 9px;background:transparent;color:#758572;font:700 11px 'DM Sans',sans-serif;cursor:pointer;transition:background-color .3s,color .3s}.language-switch button[aria-pressed="true"]{background:white;color:#234b34;box-shadow:0 1px 4px #234b3415}
+footer strong{font-weight:700;color:#71846d}
+@media(max-width:600px){.header .brand{order:1}.header .language-switch{order:2;margin-left:auto}.header .nav{order:3}.format-row .custom-select{width:100%}}
+@media(min-width:371px) and (max-width:600px){.format-row .custom-select{width:auto}}
+.process-status{margin-top:16px}.process-status[hidden]{display:none}.progress-line{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#63805a;font-size:12px;font-weight:700}.process-status progress{display:block;width:100%;height:7px;margin-top:12px;border:0;border-radius:10px;overflow:hidden;appearance:none;background:#e9f1e3}.process-status progress::-webkit-progress-bar{background:#e9f1e3}.process-status progress::-webkit-progress-value{background:#75a35d;border-radius:10px}.process-status progress::-moz-progress-bar{background:#75a35d;border-radius:10px}.image-comparison{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}.image-comparison figure{margin:0;min-width:0}.image-comparison img{width:100%;height:130px;object-fit:contain;background:#f3f7ef;border-radius:8px}.image-comparison figcaption,.image-comparison span{display:block;margin-top:5px;color:#758a74;font-size:11px}.image-comparison figcaption{font-weight:700}
+.pdf-loading{margin-top:16px;padding:12px 14px;color:#54754a;background:#f0f7eb;border-radius:8px;font-size:13px}.pdf-loading[hidden]{display:none}
+.privacy-note{max-width:650px;margin:48px auto 0;padding:20px 22px;border:1px solid #dfeada;border-radius:12px;background:#f1f7ec;color:#536d50;font-size:12px;line-height:1.65}.privacy-note strong{color:#315b37;font-size:13px}.privacy-note p{margin:6px 0 0}.privacy-note p+p{margin-top:5px}
+/* Text contrast for readable labels and secondary copy. */
+.nav-item,.language-switch button{color:#526b50}
+.intro h1 span{color:#52783e}
+.intro p,.card-top p,.target-row p,.pdf-toolbar p,.pdf-note,.benefits p,footer,footer strong{color:#566b53}
+.eyebrow,.step-label{color:#49683b}
+.dropzone>span:not(.upload-icon):not(.choose){color:#566b53}
+.input-wrap .select-trigger,.select-trigger{color:#334f36}
+.input-wrap .select-value{color:#334f36}
+.reset{color:#48623d}
+dialog p{color:#566b53}
+/* An illustrated, readable guide to each tool. */
+.how-it-works{max-width:650px;margin:40px auto 0;padding:22px 24px 24px;border:1px solid #e1eadb;border-radius:18px;background:#f0f6e9;overflow:hidden}
+.steps-heading{text-align:center}.steps-heading h2{font:800 18px 'Plus Jakarta Sans',sans-serif;letter-spacing:-.5px;margin:7px 0}.steps-heading p{margin:0;color:#566b53;font-size:12px;line-height:1.5}
+.steps-list{list-style:none;padding:0;margin:19px 0 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.step-card{position:relative;min-width:0;background:#fff;border:1px solid #e2ecdd;border-radius:12px;padding:13px 12px 14px;display:flex;flex-direction:column;align-items:flex-start;gap:5px}
+.step-art{position:relative;width:100%;height:56px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:#f5f9f1;overflow:hidden}
+.step-art-shape{display:grid;place-items:center;width:36px;height:42px;border:1px solid #bdd4ae;border-radius:7px;background:#e6f2db;color:#375c3c;box-shadow:0 3px 0 #d5e7c9}
+.step-symbol{font:700 21px 'DM Sans',sans-serif;line-height:1}.step-art-spark{position:absolute;right:calc(50% - 34px);top:7px;color:#7c9f62;font-size:12px}
+.step-number{font-size:10px;letter-spacing:1px;font-weight:800;color:#536e4a;margin-top:4px}.step-card strong{font-size:12px;color:#203d2c}.step-card p{font-size:11px;line-height:1.5;color:#566b53;margin:0}
+@media(prefers-reduced-motion:no-preference){.how-it-works{animation:enter-soft .9s .1s cubic-bezier(.22,1,.36,1) both}.step-art-shape{animation:step-float 5.4s ease-in-out infinite}.step-card:nth-child(2) .step-art-shape{animation-delay:.6s}.step-card:nth-child(3) .step-art-shape{animation-delay:1.2s}.step-art-spark{animation:step-glow 5.4s ease-in-out infinite}.step-card:nth-child(2) .step-art-spark{animation-delay:.6s}.step-card:nth-child(3) .step-art-spark{animation-delay:1.2s}@keyframes step-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}@keyframes step-glow{0%,100%{opacity:.45;transform:scale(.9)}50%{opacity:1;transform:scale(1.08)}}}
+@media(max-width:600px){.how-it-works{margin-top:32px;padding:18px 16px}.steps-list{gap:6px}.step-card{padding:9px 7px 10px}.step-card p{font-size:10px}.step-art{height:48px}}
+/* Present one illustrated instruction at a time, without cards or panels. */
+.how-it-works{padding:0;margin:42px auto 0;border:0;border-radius:0;background:transparent;overflow:visible}
+.steps-heading p{margin-top:6px}
+.steps-list{position:relative;display:block;height:115px;margin:18px auto 0;max-width:330px}
+.step-card{position:absolute;inset:0;display:grid;grid-template-columns:66px minmax(0,1fr);grid-template-rows:auto auto auto;column-gap:17px;row-gap:4px;align-content:center;padding:0;border:0;border-radius:0;background:transparent;opacity:0;visibility:hidden}
+.step-art{grid-column:1;grid-row:1 / 4;width:66px;height:66px;background:transparent;overflow:visible}
+.step-art-shape{width:52px;height:58px;border:1.5px solid #98b788;border-radius:9px;background:transparent;box-shadow:none}
+.step-symbol{font-size:27px;color:#456c3c}.step-art-spark{right:0;top:0;font-size:15px;color:#648c4d}
+.step-number{grid-column:2;margin:0;font-size:10px}.step-card strong{grid-column:2;font-size:15px;line-height:1.3}.step-card p{grid-column:2;font-size:12px;line-height:1.5}
+@media(prefers-reduced-motion:no-preference){
+  .step-art-shape,.step-art-spark{animation:none}
+  .step-card{animation:step-sequence 12s ease-in-out infinite}
+  .step-card:nth-child(2){animation-delay:4s}.step-card:nth-child(3){animation-delay:8s}
+  @keyframes step-sequence{0%{opacity:0;visibility:visible;transform:translateY(7px)}5%,28%{opacity:1;visibility:visible;transform:translateY(0)}33%,100%{opacity:0;visibility:hidden;transform:translateY(-5px)}}
+}
+@media(prefers-reduced-motion:reduce){
+  .steps-list{height:auto;display:grid;gap:14px}
+  .step-card{position:static;opacity:1;visibility:visible;min-height:66px}
+}
+@media(max-width:600px){.how-it-works{margin-top:32px;padding:0 8px}.steps-list{max-width:270px}.step-card p{font-size:12px}.step-art{height:66px}}
+/* One animated step at a time, in a softly framed guide. */
+.how-it-works{max-width:650px;padding:24px 28px 20px;border:1px solid #e1eadb;border-radius:18px;background:#f0f6e9;overflow:hidden}
+.steps-list{height:137px;max-width:410px;margin-top:18px}
+.step-card{grid-template-columns:84px minmax(0,1fr);column-gap:20px;inset:0;padding:17px 22px;border:1px solid #e2ecdd;border-radius:13px;background:#fff;box-shadow:0 8px 24px #234b3409}
+.step-art{width:74px;height:74px;background:#f1f7ed;border-radius:12px}
+.step-art-shape{width:44px;height:52px;border:1px solid #b5d0a5;border-radius:8px;background:#e6f2db;box-shadow:0 4px 0 #d5e7c9}
+.step-symbol{font-size:24px}.step-art-spark{right:6px;top:5px}
+.step-number{color:#526c49}.step-card strong{font-size:15px}.step-card p{font-size:12px}
+.step-indicators{display:flex;justify-content:center;gap:7px;margin:13px 0 0;height:6px}
+.step-indicators span{display:block;width:6px;height:6px;border-radius:50%;background:#a0ba94}
+@media(prefers-reduced-motion:no-preference){
+  .step-card{--step-delay:0s;animation:step-card-cycle 12s linear infinite;animation-delay:var(--step-delay)}
+  .step-card:nth-child(2){--step-delay:4s;animation-delay:var(--step-delay)}
+  .step-card:nth-child(3){--step-delay:8s;animation-delay:var(--step-delay)}
+  .step-card .step-art{animation:step-art-cycle 12s cubic-bezier(.22,1,.36,1) infinite;animation-delay:var(--step-delay)}
+  .step-card .step-number,.step-card strong,.step-card p{animation:step-copy-cycle 12s cubic-bezier(.22,1,.36,1) infinite;animation-delay:var(--step-delay)}
+  .step-card .step-art-shape{animation:step-shape-cycle 12s ease-in-out infinite;animation-delay:var(--step-delay)}
+  .step-card .step-art-spark{animation:step-spark-cycle 12s ease-in-out infinite;animation-delay:var(--step-delay)}
+  .step-indicators span{animation:step-dot-cycle 12s ease-in-out infinite}
+  .step-indicators span:nth-child(2){animation-delay:4s}.step-indicators span:nth-child(3){animation-delay:8s}
+  @keyframes step-card-cycle{0%{opacity:0;visibility:visible;transform:translateX(18px)}5%,28%{opacity:1;visibility:visible;transform:translateX(0)}33%,100%{opacity:0;visibility:hidden;transform:translateX(-18px)}}
+  @keyframes step-art-cycle{0%{opacity:0;transform:translateX(18px) rotate(5deg)}7%,26%{opacity:1;transform:translateX(0) rotate(0)}33%,100%{opacity:0;transform:translateX(-16px) rotate(-4deg)}}
+  @keyframes step-copy-cycle{0%,1%{opacity:0;transform:translateX(12px)}8%,26%{opacity:1;transform:translateX(0)}33%,100%{opacity:0;transform:translateX(-10px)}}
+  @keyframes step-shape-cycle{0%,7%{transform:translateY(5px) scale(.92)}14%,25%{transform:translateY(0) scale(1)}33%,100%{transform:translateY(-3px) scale(.96)}}
+  @keyframes step-spark-cycle{0%,5%{opacity:0;transform:scale(.5) rotate(-35deg)}12%,24%{opacity:1;transform:scale(1) rotate(0)}33%,100%{opacity:0;transform:scale(.6) rotate(25deg)}}
+  @keyframes step-dot-cycle{0%,33%,100%{background:#a0ba94;transform:scale(1)}5%,28%{background:#456d39;transform:scale(1.25)}}
+}
+@media(prefers-reduced-motion:reduce){.steps-list{height:auto;max-width:410px}.step-card{padding:14px 18px;min-height:108px}.step-indicators{display:none}}
+@media(max-width:600px){.how-it-works{padding:20px 16px 17px}.steps-list{height:130px;max-width:330px}.step-card{grid-template-columns:64px minmax(0,1fr);column-gap:14px;padding:14px 12px}.step-art{width:60px;height:70px}.step-art-shape{width:40px;height:48px}.step-card p{font-size:12px}}
+@media(max-width:600px) and (prefers-reduced-motion:reduce){.steps-list{height:auto}}
+/* The guide sits below the tool and shares the page background. */
+.how-it-works{padding:0;margin:55px auto 0;border:0;border-radius:0;background:transparent;overflow:visible}
+.steps-list{height:116px;max-width:330px;margin-top:14px}
+.step-card{grid-template-columns:66px minmax(0,1fr);column-gap:17px;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+.step-art{width:66px;height:66px;background:transparent;border-radius:0}
+.step-art-shape{width:50px;height:56px;background:transparent;box-shadow:none;border:1.5px solid #98b788;border-radius:9px}
+.step-art-spark{right:0;top:0}.step-indicators{margin-top:2px}
+@media(max-width:600px){.how-it-works{padding:0 8px;margin-top:44px}.steps-list{height:110px;max-width:270px}.step-card{grid-template-columns:60px minmax(0,1fr);gap:14px;padding:0}.step-art{width:60px;height:66px;background:transparent}.step-art-shape{width:46px;height:52px}}
+@media(prefers-reduced-motion:reduce){.steps-list{height:auto}.step-card{padding:0;min-height:66px}}
+.benefits-divider{display:flex;align-items:center;gap:18px;max-width:850px;margin:56px auto 0;color:#526b50;font-size:10px;font-weight:800;letter-spacing:1.4px;white-space:nowrap}
+.benefits-divider::before,.benefits-divider::after{content:'';height:1px;background:#d9e5d3;flex:1}
+.benefits-divider+.benefits{margin-top:30px}
+@media(max-width:600px){.benefits-divider{margin-top:44px;gap:12px}.benefits-divider+.benefits{margin-top:24px}}
+/* Trial: each rotating instruction has its own compact card. */
+.steps-list{height:137px;max-width:410px;margin-top:18px}
+.step-card{grid-template-columns:84px minmax(0,1fr);column-gap:20px;padding:17px 22px;border:1px solid #e2ecdd;border-radius:13px;background:#fff;box-shadow:0 8px 24px #234b340c}
+.step-art{width:74px;height:74px;background:#f1f7ed;border-radius:12px}
+.step-art-shape{width:44px;height:52px;border:1px solid #b5d0a5;border-radius:8px;background:#e6f2db;box-shadow:0 4px 0 #d5e7c9}
+.step-art-spark{right:6px;top:5px}.step-indicators{margin-top:13px}
+@media(max-width:600px){.steps-list{height:130px;max-width:330px}.step-card{grid-template-columns:64px minmax(0,1fr);column-gap:14px;padding:14px 12px}.step-art{width:60px;height:70px;background:#f1f7ed}.step-art-shape{width:40px;height:48px}}
+@media(prefers-reduced-motion:reduce){.steps-list{height:auto;max-width:410px}.step-card{padding:14px 18px;min-height:108px}}

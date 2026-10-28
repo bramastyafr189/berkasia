@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Kompres gambar dan PDF ke ukuran yang kamu inginkan.">
-  <title>Berkasia — Kompres, convert, dan kelola PDF</title>
+  <title>Berkasia — Kompres, konversi, dan kelola PDF</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-<header class="header"><a class="brand" href="/"><span class="brand-icon">↘</span> berkasia<span class="brand-dot">.</span></a><nav class="nav" aria-label="Alat"><button class="nav-item active" data-tool="compress" aria-current="page">Kompres</button><button class="nav-item" data-tool="convert">Convert</button><button class="nav-item" data-tool="pdf">Kelola PDF</button></nav></header>
+<header class="header"><a class="brand" href="/"><span class="brand-icon">↘</span> berkasia<span class="brand-dot">.</span></a><nav class="nav" aria-label="Alat"><button class="nav-item active" data-tool="compress" aria-current="page">Kompres</button><button class="nav-item" data-tool="convert">Konversi</button><button class="nav-item" data-tool="pdf">Kelola PDF</button></nav><div class="language-switch" role="group" aria-label="Bahasa"><button type="button" data-lang="id" aria-pressed="true">ID</button><button type="button" data-lang="en" aria-pressed="false">EN</button></div></header>
 <main>
   <section class="intro"><div class="eyebrow"><span>✳</span> <strong id="intro-label">LEBIH KECIL, TETAP BERARTI</strong></div><h1>File besar?<br><span>Bikin ringkas.</span></h1><p>Tentukan ukuran yang kamu mau, biar kami yang mengurus sisanya.</p></section>
   <section class="workspace" id="file-workspace" aria-label="Kompres file">
@@ -18,8 +18,10 @@
       <label class="dropzone" id="dropzone" for="file"><input id="file" type="file" accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf" multiple required><span class="upload-icon">↑</span><strong id="file-title">Pilih file atau tarik ke sini</strong><span id="file-hint">JPG, PNG, WebP, atau PDF · Maks. 50 MB per file</span><span class="choose">Pilih file <span>↗</span></span></label>
       <div class="target-row" id="target-row"><div><label for="target">Target ukuran</label><p>Ukuran maksimal untuk setiap file</p></div><div class="input-wrap"><input id="target" type="number" min="0.01" step="0.01" value="2" required aria-label="Target ukuran"><select id="unit" aria-label="Satuan target"><option value="MB">MB</option><option value="KB">KB</option></select></div></div>
       <div class="target-row format-row" id="format-row"><div><label for="format">Format hasil gambar</label><p id="format-hint">Pilih format asli untuk memproses PDF</p></div><select id="format" aria-label="Format hasil gambar"><option value="original">Format asli</option><option value="JPEG">JPG</option><option value="PNG">PNG</option><option value="WEBP">WebP</option><option value="PDF" disabled>PDF</option></select></div>
-      <p class="pdf-note" id="compression-warning">Kompresi PDF dapat mengubah halaman menjadi gambar: teks tidak dapat dipilih dan tautan, formulir, serta tanda tangan dapat hilang. Simpan file asli.</p>
+      <div class="target-row format-row" id="pdf-method-row"><div><label for="pdf-method">Metode kompresi PDF</label><p>Jaga teks dipilih secara bawaan; hasil mungkin tidak banyak mengecil.</p></div><select id="pdf-method" aria-label="Metode kompresi PDF"><option value="preserve">Jaga teks</option><option value="raster">Kompresi kuat</option></select></div>
+      <p class="pdf-note" id="compression-warning">Kompresi kuat mengubah halaman PDF menjadi gambar: teks, tautan, formulir, dan tanda tangan dapat hilang. Simpan file asli.</p>
       <button class="submit" id="submit" type="submit"><span id="button-label">Kompres sekarang</span><span>↗</span></button>
+      <div class="process-status" id="process-status" hidden><div class="progress-line"><span id="progress-label" role="status" aria-live="polite">Memproses…</span><button type="button" class="small-button" id="cancel-process">Batalkan</button></div><progress id="process-progress" max="100" value="0" aria-label="Kemajuan proses"></progress></div>
     </form>
     <div id="message" class="message" role="status" aria-live="polite" hidden></div>
     <div id="result" class="result" hidden><div class="result-heading"><div><span class="step-label">SELESAI DIPROSES</span><h3>Hasil kompresi</h3></div><span class="result-check">✓</span></div><p>Periksa hasil setiap file, lalu unduh yang kamu butuhkan. Unduh hasil sebelum menutup halaman.</p><div id="results"></div><button type="button" class="download-all" id="download-all" hidden>Unduh semua sebagai ZIP <span>↓</span></button><button type="button" class="reset" id="reset">Kompres file lain</button></div>
@@ -28,9 +30,21 @@
     <div class="card-top"><div><div class="step-label">SUSUN SESUAI KEBUTUHAN</div><h2>Kelola halaman PDF</h2><p>Susun, tambah, ganti, putar, dan hapus halaman.</p></div><span class="card-icon">↗</span></div>
     <label class="dropzone pdf-upload" for="pdf-start"><input id="pdf-start" type="file" accept=".pdf,application/pdf"><span class="upload-icon">↑</span><strong>Pilih PDF untuk mulai</strong><span>Maks. 50 MB dan 100 halaman</span><span class="choose">Pilih PDF ↗</span></label>
     <div id="pdf-editor" hidden><div class="pdf-toolbar"><div><strong id="page-count"></strong><p>Seret halaman untuk mengurutkan, atau gunakan tombol panah.</p></div><button type="button" class="small-button" id="add-pages">＋ Tambah halaman</button></div><div id="page-grid" class="page-grid"></div><p class="pdf-note">Perubahan dapat memengaruhi formulir, tautan, dan tanda tangan digital. Unduh hasil sebelum menutup halaman.</p><button type="button" class="submit" id="save-pdf">Simpan PDF <span>↓</span></button><a id="pdf-download" class="download" download="berkasia-hasil.pdf" hidden>Unduh PDF <span>↓</span></a><button type="button" class="reset" id="pdf-reset">Mulai ulang</button></div>
+    <div id="pdf-loading" class="pdf-loading" role="status" aria-live="polite" hidden>Menyiapkan halaman PDF…</div>
     <div id="pdf-message" class="message" role="status" aria-live="polite" hidden></div><input id="pdf-source" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp" hidden>
-    <dialog id="page-dialog"><form method="dialog"><div class="dialog-heading"><h3>Pilih halaman</h3><button value="cancel" aria-label="Tutup">×</button></div><p id="dialog-note">Pilih halaman yang ingin ditambahkan.</p><div id="source-pages" class="source-pages"></div><div class="dialog-actions"><button value="cancel" class="small-button">Batal</button><button id="confirm-pages" value="confirm" class="small-button primary">Gunakan halaman</button></div></form></dialog>
+    <dialog id="page-dialog" aria-labelledby="page-dialog-title"><form method="dialog"><div class="dialog-heading"><h3 id="page-dialog-title">Pilih halaman</h3><button value="cancel" aria-label="Tutup">×</button></div><p id="dialog-note">Pilih halaman yang ingin ditambahkan.</p><div id="source-pages" class="source-pages"></div><div class="dialog-actions"><button value="cancel" class="small-button">Batal</button><button id="confirm-pages" value="confirm" class="small-button primary">Gunakan halaman</button></div></form></dialog>
   </section>
+  <section class="how-it-works" aria-labelledby="steps-title">
+    <div class="steps-heading"><span class="step-label">CARA KERJA</span><h2 id="steps-title">Tiga langkah, beres.</h2><p id="steps-description">Kecilkan file agar lebih mudah dibagikan.</p></div>
+    <ol class="steps-list">
+      <li class="step-card"><div class="step-art" aria-hidden="true"><span class="step-art-shape"><span class="step-symbol">↑</span></span><span class="step-art-spark">✳</span></div><span class="step-number">01</span><strong>Pilih file</strong><p>Tambahkan gambar atau PDF.</p></li>
+      <li class="step-card"><div class="step-art" aria-hidden="true"><span class="step-art-shape"><span class="step-symbol">◉</span></span><span class="step-art-spark">✳</span></div><span class="step-number">02</span><strong>Atur target</strong><p>Tentukan ukuran yang diinginkan.</p></li>
+      <li class="step-card"><div class="step-art" aria-hidden="true"><span class="step-art-shape"><span class="step-symbol">↓</span></span><span class="step-art-spark">✳</span></div><span class="step-number">03</span><strong>Unduh hasil</strong><p>Simpan file yang sudah diproses.</p></li>
+    </ol>
+    <div class="step-indicators" aria-hidden="true"><span></span><span></span><span></span></div>
+  </section>
+  <div class="benefits-divider"><span>KENAPA BERKASIA</span></div>
   <section class="benefits"><div><span class="benefit-icon">◎</span><div><strong>Kamu yang tentukan</strong><p>Masukkan target ukuran sesuai kebutuhanmu.</p></div></div><div><span class="benefit-icon">✳</span><div><strong>Otomatis & praktis</strong><p>Kami cari pengaturan kompresi untukmu.</p></div></div><div><span class="benefit-icon">◇</span><div><strong>Ringan dibagikan</strong><p>File lebih siap dikirim atau diunggah.</p></div></div></section>
-</main><footer><span>© 2026 berkasia.</span><span>Dibuat untuk memberi ruang lebih.</span></footer><script type="module" src="/main.js"></script>
+<section class="privacy-note" aria-label="Privasi dan batasan"><strong>File tetap di perangkatmu.</strong><p>File diproses di browser dan tidak dikirim ke server Berkasia. Unduh hasil sebelum menutup atau memuat ulang halaman.</p><p>Kompresi PDF kuat mengubah halaman menjadi gambar; teks dan elemen interaktif dapat hilang. Simpan file asli.</p></section>
+</main><footer><span>© 2026 berkasia.</span><span>Dibuat oleh <strong>Bramastya Fadhil Rinanto</strong></span></footer><script type="module" src="/main.js"></script>
 </body></html>
