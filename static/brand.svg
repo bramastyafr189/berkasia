@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="18" fill="#c4f46c"/>
+  <!-- Layered pages represent document organization. -->
+  <path d="M19 15h20a5 5 0 0 1 5 5v3" fill="none" stroke="#335c39" stroke-width="3" stroke-linecap="round" opacity=".48"/>
+  <path d="M16 22a5 5 0 0 1 5-5h16l11 11v19a5 5 0 0 1-5 5H21a5 5 0 0 1-5-5V22Z" fill="#f8ffef" stroke="#244b34" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M37 17v8a3 3 0 0 0 3 3h8" fill="none" stroke="#244b34" stroke-width="3" stroke-linejoin="round"/>
+  <!-- A continuous inward arrow suggests conversion and compression. -->
+  <path d="M23 32h14M32 27l5 5-5 5M41 44H27M32 49l-5-5 5-5" fill="none" stroke="#335e39" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

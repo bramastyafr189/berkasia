@@ -154,3 +154,5 @@ dialog p{color:#566b53}
 .step-art-spark{right:6px;top:5px}.step-indicators{margin-top:13px}
 @media(max-width:600px){.steps-list{height:130px;max-width:330px}.step-card{grid-template-columns:64px minmax(0,1fr);column-gap:14px;padding:14px 12px}.step-art{width:60px;height:70px;background:#f1f7ed}.step-art-shape{width:40px;height:48px}}
 @media(prefers-reduced-motion:reduce){.steps-list{height:auto;max-width:410px}.step-card{padding:14px 18px;min-height:108px}}
+
+.brand-icon{display:block;object-fit:contain;background:transparent}
