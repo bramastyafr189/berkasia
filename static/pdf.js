@@ -9,8 +9,42 @@ let sourceAction = null;
 let incoming = null;
 let dragged = null;
 let editorGeneration = 0;
+const undoButton = document.querySelector('#pdf-undo');
+const redoButton = document.querySelector('#pdf-redo');
+const HISTORY_LIMIT = 50;
+let undoStack = [], redoStack = [], editorBusy = false;
+const snapshot = () => pdfPages.map(page => ({ ...page }));
+function updateHistoryButtons() {
+  undoButton.disabled = editorBusy || !undoStack.length;
+  redoButton.disabled = editorBusy || !redoStack.length;
+}
+function rememberChange() {
+  undoStack.push(snapshot());
+  if (undoStack.length > HISTORY_LIMIT) undoStack.shift();
+  redoStack = [];
+  updateHistoryButtons();
+}
+function restoreHistory(from, to) {
+  if (editorBusy || !from.length) return;
+  to.push(snapshot());
+  if (to.length > HISTORY_LIMIT) to.shift();
+  pdfPages = from.pop();
+  changedPdf(); renderPdfPages(); updateHistoryButtons();
+}
+undoButton.addEventListener('click', () => restoreHistory(undoStack, redoStack));
+redoButton.addEventListener('click', () => restoreHistory(redoStack, undoStack));
+document.addEventListener('keydown', event => {
+  if (pdfEditor.hidden || document.querySelector('#pdf-workspace').hidden || editorBusy || pdfDialog.open || event.altKey || !(event.metaKey || event.ctrlKey)) return;
+  const target = event.target;
+  if (target instanceof HTMLElement && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))) return;
+  const key = event.key.toLowerCase();
+  if (key === 'z' || key === 'y') {
+    const redo = key === 'y' || event.shiftKey;
+    if ((redo ? redoStack : undoStack).length) { event.preventDefault(); restoreHistory(redo ? redoStack : undoStack, redo ? undoStack : redoStack); }
+  }
+});
 const pdfLoading = document.querySelector('#pdf-loading');
-function setPdfLoading(busy) { pdfLoading.hidden = !busy; pdfStart.disabled = busy; pdfSource.disabled = busy; document.querySelector('#add-pages').disabled = busy; document.querySelector('#save-pdf').disabled = busy || pdfPages.length === 0; pageGrid.inert = busy; }
+function setPdfLoading(busy) { editorBusy = busy; updateHistoryButtons(); pdfLoading.hidden = !busy; pdfStart.disabled = busy; pdfSource.disabled = busy; document.querySelector('#add-pages').disabled = busy; document.querySelector('#save-pdf').disabled = busy || pdfPages.length === 0; pageGrid.inert = busy; }
 function pdfError(text) { pdfMessage.textContent = text; pdfMessage.hidden = !text; }
 function changedPdf() { const download = document.querySelector('#pdf-download'); window.releaseOutput(download.href); download.removeAttribute('href'); download.hidden = true; pdfError(''); }
 async function loadPdfSource(file) {
@@ -27,18 +61,18 @@ function renderPdfPages(focusIndex = null, focusAction = null) {
     card.addEventListener('dragstart', e => { dragged = index; e.dataTransfer.effectAllowed = 'move'; card.classList.add('dragging'); });
     card.addEventListener('dragend', () => { dragged = null; card.classList.remove('dragging'); });
     card.addEventListener('dragover', e => e.preventDefault());
-    card.addEventListener('drop', e => { e.preventDefault(); if (dragged === null || dragged === index) return; const [page] = pdfPages.splice(dragged, 1); pdfPages.splice(index, 0, page); dragged = null; changedPdf(); renderPdfPages(); });
+    card.addEventListener('drop', e => { e.preventDefault(); if (dragged === null || dragged === index) return; rememberChange(); const [page] = pdfPages.splice(dragged, 1); pdfPages.splice(index, 0, page); dragged = null; changedPdf(); renderPdfPages(); });
     const preview = document.createElement('div'); preview.className = 'page-preview';
     const image = document.createElement('img'); image.src = `data:image/png;base64,${item.thumbnail}`; image.alt = `Pratinjau halaman ${index+1}`; image.style.transform = `rotate(${item.rotation}deg)`; preview.append(image);
     const title = document.createElement('div'); title.className = 'page-info'; title.textContent = `Halaman ${index + 1}`; title.title = `${item.label}, halaman sumber ${item.page + 1}`;
     const controls = document.createElement('div'); controls.className = 'page-actions';
     function button(label, title, fn, disabled = false) { const el = document.createElement('button'); el.type = 'button'; el.textContent = label; el.title = title; el.dataset.action = title; el.setAttribute('aria-label', `${title} halaman ${index + 1}`); el.disabled = disabled; el.addEventListener('click', fn); controls.append(el); }
-    button('←', 'Pindah ke kiri', () => { [pdfPages[index-1],pdfPages[index]] = [pdfPages[index],pdfPages[index-1]]; changedPdf(); renderPdfPages(index - 1, 'Pindah ke kiri'); }, index === 0);
-    button('→', 'Pindah ke kanan', () => { [pdfPages[index+1],pdfPages[index]] = [pdfPages[index],pdfPages[index+1]]; changedPdf(); renderPdfPages(index + 1, 'Pindah ke kanan'); }, index === pdfPages.length-1);
-    button('↻', 'Putar', () => { item.rotation = (item.rotation+90)%360; image.style.transform = `rotate(${item.rotation}deg)`; changedPdf(); });
-    button('⧉', 'Duplikat', () => { if(pdfPages.length >= 100) return pdfError('Maksimal 100 halaman.'); pdfPages.splice(index+1,0,{...item}); changedPdf(); renderPdfPages(index+1, 'Duplikat'); });
+    button('←', 'Pindah ke kiri', () => { rememberChange(); [pdfPages[index-1],pdfPages[index]] = [pdfPages[index],pdfPages[index-1]]; changedPdf(); renderPdfPages(index - 1, 'Pindah ke kiri'); }, index === 0);
+    button('→', 'Pindah ke kanan', () => { rememberChange(); [pdfPages[index+1],pdfPages[index]] = [pdfPages[index],pdfPages[index+1]]; changedPdf(); renderPdfPages(index + 1, 'Pindah ke kanan'); }, index === pdfPages.length-1);
+    button('↻', 'Putar', () => { rememberChange(); item.rotation = (item.rotation+90)%360; image.style.transform = `rotate(${item.rotation}deg)`; changedPdf(); });
+    button('⧉', 'Duplikat', () => { if(pdfPages.length >= 100) return pdfError('Maksimal 100 halaman.'); rememberChange(); pdfPages.splice(index+1,0,{...item}); changedPdf(); renderPdfPages(index+1, 'Duplikat'); });
     button('Ganti', 'Ganti', () => { sourceAction = {type:'replace', index}; pdfSource.value=''; pdfSource.click(); });
-    button('Hapus', 'Hapus', () => { pdfPages.splice(index,1); changedPdf(); renderPdfPages(Math.min(index, pdfPages.length - 1), 'Hapus'); });
+    button('Hapus', 'Hapus', () => { rememberChange(); pdfPages.splice(index,1); changedPdf(); renderPdfPages(Math.min(index, pdfPages.length - 1), 'Hapus'); });
     card.append(preview,title,controls); pageGrid.append(card);
   });
   document.querySelector('#save-pdf').disabled = pdfPages.length === 0;
@@ -48,7 +82,7 @@ function renderPdfPages(focusIndex = null, focusAction = null) {
 pdfStart.addEventListener('change', async () => {
   if (!pdfStart.files.length) return;
   const generation = editorGeneration; setPdfLoading(true);
-  try { pdfError(''); const pages = await loadPdfSource(pdfStart.files[0]); if (generation !== editorGeneration) return; if (pages.kind !== 'pdf') throw new Error('Pilih PDF untuk memulai.'); pdfPages = pages.pages; pdfEditor.hidden = false; document.querySelector('.pdf-upload').hidden = true; changedPdf(); renderPdfPages(); window.animateEntrance(pdfEditor); }
+  try { pdfError(''); const pages = await loadPdfSource(pdfStart.files[0]); if (generation !== editorGeneration) return; if (pages.kind !== 'pdf') throw new Error('Pilih PDF untuk memulai.'); undoStack = []; redoStack = []; updateHistoryButtons(); pdfPages = pages.pages; pdfEditor.hidden = false; document.querySelector('.pdf-upload').hidden = true; changedPdf(); renderPdfPages(); window.animateEntrance(pdfEditor); }
   catch (error) { if (generation === editorGeneration) { pdfError(error.message); pdfStart.value = ''; } }
   finally { if (generation === editorGeneration) setPdfLoading(false); }
 });
@@ -68,18 +102,20 @@ pdfSource.addEventListener('change', async () => {
 document.querySelector('#confirm-pages').addEventListener('click', event => {
   const selected = [...document.querySelectorAll('#source-pages input:checked')].map(input => incoming[Number(input.value)]);
   if (!selected.length) { event.preventDefault(); document.querySelector('#dialog-note').textContent = 'Pilih setidaknya satu halaman.'; return; }
+  if (sourceAction.type === 'add' && pdfPages.length + selected.length > 100) { event.preventDefault(); document.querySelector('#dialog-note').textContent = 'Maksimal 100 halaman dalam satu PDF.'; return; }
+  rememberChange();
   if (sourceAction.type === 'replace') pdfPages.splice(sourceAction.index,1,selected[0]);
-  else { if (pdfPages.length + selected.length > 100) { event.preventDefault(); document.querySelector('#dialog-note').textContent = 'Maksimal 100 halaman dalam satu PDF.'; return; } pdfPages.push(...selected); }
+  else pdfPages.push(...selected);
   changedPdf(); renderPdfPages();
 });
 document.querySelector('#save-pdf').addEventListener('click', async () => {
   const button = document.querySelector('#save-pdf'); button.disabled = true; button.textContent = 'Menyimpan…'; pdfError('');
-  pageGrid.inert = true; document.querySelector('#add-pages').disabled = true; document.querySelector('#pdf-reset').disabled = true;
+  editorBusy = true; updateHistoryButtons(); pageGrid.inert = true; document.querySelector('#add-pages').disabled = true; document.querySelector('#pdf-reset').disabled = true;
   try {
     const response = await window.localFetch('/pdf/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(pdfPages.map(({source,page,rotation}) => ({source,page,rotation})))});
     const data = await response.json(); if (!response.ok) throw new Error(data.error || 'PDF tidak dapat disimpan.');
     const download = document.querySelector('#pdf-download'); window.releaseOutput(download.href); download.href = data.downloadUrl; download.hidden = false; window.animateEntrance(download);
   } catch (error) { pdfError(error.message); }
-  finally { button.disabled = false; pageGrid.inert = false; document.querySelector('#add-pages').disabled = false; document.querySelector('#pdf-reset').disabled = false; button.innerHTML = 'Simpan PDF <span>↓</span>'; }
+  finally { editorBusy = false; updateHistoryButtons(); button.disabled = false; pageGrid.inert = false; document.querySelector('#add-pages').disabled = false; document.querySelector('#pdf-reset').disabled = false; button.innerHTML = 'Simpan PDF <span>↓</span>'; }
 });
-document.querySelector('#pdf-reset').addEventListener('click', () => { editorGeneration++; setPdfLoading(false); pdfPages = []; incoming = null; window.releaseSources(); pdfStart.value = ''; pdfEditor.hidden = true; document.querySelector('.pdf-upload').hidden = false; changedPdf(); });
+document.querySelector('#pdf-reset').addEventListener('click', () => { editorGeneration++; undoStack = []; redoStack = []; setPdfLoading(false); pdfPages = []; incoming = null; window.releaseSources(); pdfStart.value = ''; pdfEditor.hidden = true; document.querySelector('.pdf-upload').hidden = false; changedPdf(); });

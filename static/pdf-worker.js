@@ -85,7 +85,11 @@ class WorkerCanvasFactory {
   }
 }
 
-class WorkerFilterFactory {
+// PDF.js 6.4.x uses CPU pixel fallbacks when filter factories return "none":
+// transfer maps, alpha/luminosity soft masks, and knockout masks are applied
+// by CanvasGraphics instead of DOM-dependent SVG filters. Regression tests
+// compare rendered pixels; review them before updating pdfjs-dist.
+class WorkerPixelFilterFactory {
   addFilter() { return 'none'; }
   addHCMFilter() { return 'none'; }
   addAlphaFilter() { return 'none'; }
@@ -108,7 +112,10 @@ async function loadPDF(bytes) {
       data: bytes.slice(),
       ownerDocument: self.document,
       CanvasFactory: WorkerCanvasFactory,
-      FilterFactory: WorkerFilterFactory,
+      FilterFactory: WorkerPixelFilterFactory,
+      // Without the worker Font Loading API, PDF.js must draw font glyph paths
+      // instead of inserting CSS rules into the worker's mock document.
+      disableFontFace: !self.fonts || typeof self.FontFace !== 'function',
     }).promise;
   }
   catch { throw new Error('PDF rusak atau dilindungi kata sandi.'); }

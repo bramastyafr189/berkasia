@@ -156,3 +156,6 @@ dialog p{color:#566b53}
 @media(prefers-reduced-motion:reduce){.steps-list{height:auto;max-width:410px}.step-card{padding:14px 18px;min-height:108px}}
 
 .brand-icon{display:block;object-fit:contain;background:transparent}
+.pdf-toolbar-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.pdf-toolbar-actions .small-button:disabled{opacity:.5;cursor:not-allowed}
+@media(max-width:600px){.pdf-toolbar-actions{justify-content:flex-start}.pdf-toolbar-actions .small-button{min-height:40px}}
