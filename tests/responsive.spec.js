@@ -32,3 +32,15 @@ test('mobile active capsule slides to each selected menu',async({page})=>{
 test('desktop capsule slides across the navigation',async({page})=>{
  await page.setViewportSize({width:1024,height:800});await page.goto('/');const nav=page.locator('.nav');const offset=()=>nav.evaluate(el=>new DOMMatrixReadOnly(getComputedStyle(el,'::before').transform).m41);const start=await offset();await page.getByRole('button',{name:'Konversi',exact:true}).click();await expect.poll(offset).toBeGreaterThan(start+30);const middle=await offset();await page.getByRole('button',{name:'Kelola PDF',exact:true}).click();await expect.poll(offset).toBeGreaterThan(middle+30);
 });
+
+test('touch upload controls open the native file chooser for each tool',async({page})=>{
+ await page.setViewportSize({width:375,height:800});await page.goto('/');
+ for(const name of ['Kompres','Konversi','Kelola PDF']){
+  await page.evaluate(()=>window.scrollTo(0,0));await expect(page.locator('.nav')).not.toHaveClass(/nav--hidden/);
+  await page.getByRole('button',{name,exact:true}).click();
+  const input=page.locator(name==='Kelola PDF'?'#pdf-start':'#file');
+  const [chooser]=await Promise.all([page.waitForEvent('filechooser'),input.click({position:{x:50,y:50}})]);
+  expect(await chooser.element().getAttribute('type')).toBe('file');
+ }
+ const nav=page.locator('.nav');const box=await nav.boundingBox();expect(box.width).toBeLessThanOrEqual(340);expect(box.height).toBeLessThan(60);
+});
