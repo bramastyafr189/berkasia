@@ -214,3 +214,8 @@ button, .choose, .dropzone { -webkit-user-select: none; user-select: none; }
   .nav-icon { width: 15px; height: 15px; }
 }
 @media(max-width:320px){.nav-item{font-size:9px;gap:2px}.nav-icon{width:13px;height:13px}}
+.page-card{position:relative}
+.page-drag-handle{position:absolute;top:13px;right:13px;z-index:2;display:grid;place-items:center;width:40px;height:40px;border:1px solid #d5e2d0;border-radius:10px;background:#fff;color:#35583b;font-size:22px;line-height:1;cursor:grab;touch-action:none}
+.page-drag-handle:disabled{opacity:.4;cursor:default}
+.page-card--drop-target{outline:3px solid #80ad61;outline-offset:2px}
+.page-origin{font-size:11px;line-height:1.4;color:#566b53;margin:0 0 8px}

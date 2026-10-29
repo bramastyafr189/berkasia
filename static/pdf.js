@@ -54,6 +54,12 @@ async function loadPdfSource(file) {
   const data = await response.json(); if (!response.ok) throw new Error(data.error || 'File tidak dapat dibaca.');
   return {kind: data.kind, pages: data.pages.map((thumbnail, page) => ({source:data.source, page, rotation:0, thumbnail, label:file.name}))};
 }
+function movePdfPage(from, to) {
+  if (from === to || from < 0 || to < 0 || pdfPages[from]?.deleted || pdfPages[to]?.deleted) return;
+  rememberChange();
+  const [page] = pdfPages.splice(from, 1); pdfPages.splice(to, 0, page);
+  changedPdf(); renderPdfPages(to, 'Seret');
+}
 function renderPdfPages(focusIndex = null, focusAction = null) {
   pageGrid.replaceChildren();
   document.querySelector('#page-count').textContent = `${activePageCount()} halaman`;
@@ -62,9 +68,29 @@ function renderPdfPages(focusIndex = null, focusAction = null) {
     card.addEventListener('dragstart', e => { dragged = index; e.dataTransfer.effectAllowed = 'move'; card.classList.add('dragging'); });
     card.addEventListener('dragend', () => { dragged = null; card.classList.remove('dragging'); });
     card.addEventListener('dragover', e => { if (!item.deleted) e.preventDefault(); });
-    card.addEventListener('drop', e => { e.preventDefault(); if (item.deleted || dragged === null || dragged === index) return; rememberChange(); const [page] = pdfPages.splice(dragged, 1); pdfPages.splice(index, 0, page); dragged = null; changedPdf(); renderPdfPages(); });
+    card.addEventListener('drop', e => { e.preventDefault(); if (item.deleted || dragged === null || dragged === index) return; const from = dragged; dragged = null; movePdfPage(from, index); });
     const preview = document.createElement('div'); preview.className = 'page-preview';
     const image = document.createElement('img'); image.src = `data:image/png;base64,${item.thumbnail}`; image.alt = `Pratinjau halaman ${index+1}`; image.style.transform = `rotate(${item.rotation}deg)`; preview.append(image);
+    const handle = document.createElement('button'); handle.type = 'button'; handle.className = 'page-drag-handle'; handle.textContent = '⠿'; handle.title = 'Seret'; handle.dataset.action = 'Seret'; handle.setAttribute('aria-label', `Seret halaman ${index + 1}`); handle.disabled = !!item.deleted;
+    let touchDrag = null;
+    handle.addEventListener('pointerdown', e => { if (e.pointerType !== 'touch' || item.deleted) return; e.preventDefault(); handle.setPointerCapture(e.pointerId); touchDrag = {id:e.pointerId, x:e.clientX, y:e.clientY, target:index, moved:false}; });
+    handle.addEventListener('pointermove', e => {
+      if (!touchDrag || e.pointerId !== touchDrag.id) return;
+      if (!touchDrag.moved && Math.hypot(e.clientX - touchDrag.x, e.clientY - touchDrag.y) < 8) return;
+      touchDrag.moved = true; card.classList.add('dragging');
+      const target = document.elementFromPoint(e.clientX, e.clientY)?.closest('.page-card');
+      pageGrid.querySelectorAll('.page-card--drop-target').forEach(el => el.classList.remove('page-card--drop-target'));
+      if (target && !target.classList.contains('page-card--deleted')) { touchDrag.target = [...pageGrid.children].indexOf(target); if (target !== card) target.classList.add('page-card--drop-target'); }
+      else touchDrag.target = index;
+    });
+    const endTouchDrag = (e, cancel = false) => {
+      if (!touchDrag || e.pointerId !== touchDrag.id) return;
+      const target = touchDrag.target, moved = touchDrag.moved; touchDrag = null;
+      card.classList.remove('dragging'); pageGrid.querySelectorAll('.page-card--drop-target').forEach(el => el.classList.remove('page-card--drop-target'));
+      if (!cancel && moved) movePdfPage(index, target);
+    };
+    handle.addEventListener('pointerup', e => endTouchDrag(e)); handle.addEventListener('pointercancel', e => endTouchDrag(e, true));
+    const origin = document.createElement('div'); origin.className = 'page-origin'; const originLabel = document.createElement('span'); originLabel.textContent = 'Asal'; const originPage = document.createElement('span'); originPage.textContent = `Halaman sumber ${item.page + 1}`; origin.append(originLabel, document.createTextNode(': '), originPage); origin.title = item.label;
     const title = document.createElement('div'); title.className = 'page-info'; title.textContent = `Halaman ${index + 1}`; title.title = `${item.label}, halaman sumber ${item.page + 1}`;
     const controls = document.createElement('div'); controls.className = 'page-actions';
     function button(label, title, fn, disabled = false) { const el = document.createElement('button'); el.type = 'button'; el.textContent = label; el.title = title; el.dataset.action = title; el.setAttribute('aria-label', `${title} halaman ${index + 1}`); el.disabled = disabled; el.addEventListener('click', fn); controls.append(el); }
@@ -80,7 +106,7 @@ function renderPdfPages(focusIndex = null, focusAction = null) {
     if (item.alternate) button('Tukar versi', 'Tukar versi', () => { rememberChange(); const {alternate, ...current} = item; pdfPages[index] = {...alternate, alternate:current}; changedPdf(); renderPdfPages(index, 'Tukar versi'); });
     button('Hapus', 'Hapus', () => { rememberChange(); pdfPages[index] = {...item, deleted:true}; changedPdf(); renderPdfPages(index, 'Pulihkan'); });
     }
-    card.append(preview,title,controls); pageGrid.append(card);
+    card.append(handle,preview,title,origin,controls); pageGrid.append(card);
   });
   document.querySelector('#save-pdf').disabled = activePageCount() === 0;
   window.animateEntrance(pageGrid);

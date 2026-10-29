@@ -21,7 +21,7 @@ const dictionary = {
   'Unduh file ↓':'Download file ↓','Unduh semua sebagai ZIP':'Download all as ZIP','Kompres file lain':'Compress more files','Konversi file lain':'Convert more files','Menyiapkan ZIP…':'Preparing ZIP…',
   'SUSUN SESUAI KEBUTUHAN':'ARRANGE AS YOU NEED','Kelola halaman PDF':'Manage PDF pages','Susun, tambah, ganti, putar, dan hapus halaman.':'Reorder, add, replace, rotate, and delete pages.',
   'Pilih PDF untuk mulai':'Choose a PDF to get started','Maks. 50 MB dan 100 halaman':'Max. 50 MB and 100 pages','Pilih PDF ↗':'Choose PDF ↗',
-  'Seret halaman atau gunakan panah. Perubahan bisa diurungkan selama editor terbuka.':'Drag pages or use the arrows. Changes can be undone while the editor is open.','＋ Tambah halaman':'＋ Add pages',
+  'Seret pegangan halaman atau gunakan panah. Perubahan bisa diurungkan selama editor terbuka.':'Drag the page handle or use the arrows. Changes can be undone while the editor is open.','＋ Tambah halaman':'＋ Add pages',
   'Perubahan dapat memengaruhi formulir, tautan, dan tanda tangan digital. Unduh hasil sebelum menutup halaman.':'Changes may affect forms, links, and digital signatures. Download your result before closing this page.',
   'Simpan PDF':'Save PDF','Unduh PDF':'Download PDF','Mulai ulang':'Start over','Pilih halaman':'Select pages','Tutup':'Close',
   'Pilih halaman yang ingin ditambahkan.':'Select the pages you want to add.','Pilih halaman yang ingin ditambahkan di akhir dokumen.':'Select pages to add at the end of the document.',
@@ -49,14 +49,14 @@ const fragments = [
   ['PDF diubah menjadi gambar; teks tidak lagi dapat dipilih.','The PDF was converted to images; text is no longer selectable.'],
   [' total · Klik untuk mengganti file',' total · Click to change files']
 ];
-Object.assign(dictionary, {'Pulihkan':'Restore','Tukar versi':'Swap version','Dihapus dari hasil':'Excluded from output'});
+Object.assign(dictionary, {'Asal':'Source','Seret':'Drag','Pulihkan':'Restore','Tukar versi':'Swap version','Dihapus dari hasil':'Excluded from output'});
 let language = localStorage.getItem('berkasia-language') === 'en' ? 'en' : 'id';
 const nodes = new WeakMap();
 function english(value) {
   const whitespace = value.match(/^(\s*)(.*?)(\s*)$/s); if (!whitespace) return value;
   let text = whitespace[2]; if (!text) return value;
   if (dictionary[text]) return whitespace[1] + dictionary[text] + whitespace[3];
-  text = text.replace(/^Berkurang (\d+)%$/, 'Reduced by $1%').replace(/^Bertambah (\d+)%$/, 'Increased by $1%').replace(/^(\d+) file dipilih$/, '$1 files selected').replace(/^(\d+) halaman$/, '$1 pages').replace(/^Halaman (\d+)$/, 'Page $1').replace(/^Pratinjau halaman (\d+)$/, 'Preview of page $1').replace(/^Halaman sumber (\d+)$/, 'Source page $1').replace(/^Memproses (\d+) dari (\d+)…$/, 'Processing $1 of $2…').replace(/^(Pindah ke kiri|Pindah ke kanan|Putar|Duplikat|Ganti|Hapus|Pulihkan|Tukar versi) halaman (\d+)$/, (_, action, number) => `${dictionary[action]} page ${number}`);
+  text = text.replace(/^Berkurang (\d+)%$/, 'Reduced by $1%').replace(/^Bertambah (\d+)%$/, 'Increased by $1%').replace(/^(\d+) file dipilih$/, '$1 files selected').replace(/^(\d+) halaman$/, '$1 pages').replace(/^Halaman (\d+)$/, 'Page $1').replace(/^Pratinjau halaman (\d+)$/, 'Preview of page $1').replace(/^Halaman sumber (\d+)$/, 'Source page $1').replace(/^Memproses (\d+) dari (\d+)…$/, 'Processing $1 of $2…').replace(/^(Pindah ke kiri|Pindah ke kanan|Putar|Duplikat|Ganti|Hapus|Pulihkan|Tukar versi|Seret) halaman (\d+)$/, (_, action, number) => `${dictionary[action]} page ${number}`);
   for (const [from, to] of fragments) text = text.replace(from, to);
   return whitespace[1] + text + whitespace[3];
 }

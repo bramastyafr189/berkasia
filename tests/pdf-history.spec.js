@@ -36,3 +36,15 @@ test('individual deleted and replaced pages can be restored without reverting ot
  await page.getByRole('button',{name:'Simpan PDF'}).click();const link=page.getByRole('link',{name:'Unduh PDF'});await expect(link).toBeVisible();const [download]=await Promise.all([page.waitForEvent('download'),link.click()]);expect(await pageTexts(await readFile(await download.path()))).toEqual(['FIRST','THIRD']);
  await page.locator('[data-lang=en]').click();await expect(page.getByRole('button',{name:'Restore page 3'})).toBeVisible();await expect(page.getByText('Excluded from output')).toBeVisible();
 });
+
+test('touch drag reorders pages and keeps source numbers through undo and export',async({page})=>{
+ await page.setViewportSize({width:390,height:844});await openEditor(page);await page.emulateMedia({reducedMotion:'reduce'});
+ const cards=page.locator('.page-card');const handle=cards.nth(0).locator('.page-drag-handle');await handle.scrollIntoViewIfNeeded();
+ const first=await handle.boundingBox(),target=await cards.nth(1).boundingBox();const cdp=await page.context().newCDPSession(page);
+ const point=(x,y)=>({x:Math.round(x),y:Math.round(y)});const start=point(first.x+first.width/2,first.y+first.height/2),end=point(target.x+target.width/2,target.y+60);
+ await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[start]});await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[end]});await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+ await expect(cards.nth(1).locator('.page-origin')).toContainText('Halaman sumber 1');await expect(cards.nth(0).locator('.page-origin')).toContainText('Halaman sumber 2');
+ await page.locator('#pdf-undo').click();await expect(cards.nth(0).locator('.page-origin')).toContainText('Halaman sumber 1');await page.locator('#pdf-redo').click();
+ await page.getByRole('button',{name:'Simpan PDF'}).click();const link=page.getByRole('link',{name:'Unduh PDF'});await expect(link).toBeVisible();const [download]=await Promise.all([page.waitForEvent('download'),link.click()]);expect(await pageTexts(await readFile(await download.path()))).toEqual(['SECOND','FIRST','THIRD']);
+ await page.locator('[data-lang=en]').click();await expect(cards.nth(1).locator('.page-origin')).toContainText('Source page 1');
+});
