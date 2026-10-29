@@ -9,9 +9,9 @@ async function openEditor(page){await page.goto('/');await page.getByRole('butto
 async function pageTexts(buffer){const pdf=await pdfjs.getDocument({data:new Uint8Array(buffer)}).promise,result=[];for(let i=1;i<=pdf.numPages;i++)result.push((await(await pdf.getPage(i)).getTextContent()).items.map(x=>x.str).join(' '));await pdf.cleanup();return result;}
 test('delete all pages can be undone and redone, and new edits clear redo',async({page})=>{
  await openEditor(page);const undo=page.locator('#pdf-undo'),redo=page.locator('#pdf-redo');await expect(undo).toBeDisabled();
- for(let i=0;i<3;i++)await page.getByRole('button',{name:'Hapus halaman 1'}).click();await expect(page.getByText('0 halaman',{exact:true})).toBeVisible();await expect(page.locator('#save-pdf')).toBeDisabled();
+ for(let i=1;i<=3;i++)await page.getByRole('button',{name:`Hapus halaman ${i}`}).click();await expect(page.getByText('0 halaman',{exact:true})).toBeVisible();await expect(page.locator('#save-pdf')).toBeDisabled();
  await undo.click();await expect(page.getByText('1 halaman',{exact:true})).toBeVisible();await expect(page.locator('#save-pdf')).toBeEnabled();await redo.click();await expect(page.getByText('0 halaman',{exact:true})).toBeVisible();
- await undo.click();await page.getByRole('button',{name:'Putar halaman 1'}).click();await expect(redo).toBeDisabled();
+ await undo.click();await page.getByRole('button',{name:'Putar halaman 3'}).click();await expect(redo).toBeDisabled();
 });
 test('replacement can be undone and redone, including saved document',async({page})=>{
  await openEditor(page);const [chooser]=await Promise.all([page.waitForEvent('filechooser'),page.getByRole('button',{name:'Ganti halaman 2'}).click()]);await chooser.setFiles(file('replacement.pdf','application/pdf',await sourcePDF()));
@@ -27,4 +27,12 @@ test('keyboard shortcuts undo, redo and preserve editing focus',async({page})=>{
 });
 test('undo and redo cover rotation, duplication, and English labels',async({page})=>{
  await openEditor(page);await page.getByRole('button',{name:'Putar halaman 1'}).click();await page.getByRole('button',{name:'Duplikat halaman 1'}).click();await expect(page.getByText('4 halaman',{exact:true})).toBeVisible();await page.locator('#pdf-undo').click();await expect(page.getByText('3 halaman',{exact:true})).toBeVisible();await page.locator('#pdf-undo').click();await expect(page.locator('.page-preview img').first()).toHaveCSS('transform','matrix(1, 0, 0, 1, 0, 0)');await page.locator('#pdf-redo').click();await page.locator('#pdf-redo').click();await expect(page.getByText('4 halaman',{exact:true})).toBeVisible();await page.locator('[data-lang=en]').click();await expect(page.getByRole('button',{name:'Undo'})).toBeEnabled();await expect(page.getByRole('button',{name:'Redo'})).toBeDisabled();
+});
+
+test('individual deleted and replaced pages can be restored without reverting other edits',async({page})=>{
+ await openEditor(page);await page.getByRole('button',{name:'Hapus halaman 1'}).click();await page.getByRole('button',{name:'Hapus halaman 3'}).click();await expect(page.locator('.page-card--deleted')).toHaveCount(2);await page.getByRole('button',{name:'Pulihkan halaman 1'}).click();await expect(page.getByText('2 halaman',{exact:true})).toBeVisible();
+ const [chooser]=await Promise.all([page.waitForEvent('filechooser'),page.getByRole('button',{name:'Ganti halaman 2'}).click()]);await chooser.setFiles(file('replacement.pdf','application/pdf',await sourcePDF()));await page.getByRole('radio',{name:'Halaman sumber 3 Halaman 3'}).check();await page.getByRole('button',{name:'Gunakan halaman'}).click();
+ await page.getByRole('button',{name:'Tukar versi halaman 2'}).click();await expect(page.locator('.page-info').nth(1)).toHaveAttribute('title','source.pdf, halaman sumber 2');await page.getByRole('button',{name:'Tukar versi halaman 2'}).click();await expect(page.locator('.page-info').nth(1)).toHaveAttribute('title','replacement.pdf, halaman sumber 3');
+ await page.getByRole('button',{name:'Simpan PDF'}).click();const link=page.getByRole('link',{name:'Unduh PDF'});await expect(link).toBeVisible();const [download]=await Promise.all([page.waitForEvent('download'),link.click()]);expect(await pageTexts(await readFile(await download.path()))).toEqual(['FIRST','THIRD']);
+ await page.locator('[data-lang=en]').click();await expect(page.getByRole('button',{name:'Restore page 3'})).toBeVisible();await expect(page.getByText('Excluded from output')).toBeVisible();
 });

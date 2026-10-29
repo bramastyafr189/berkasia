@@ -5,6 +5,7 @@ window.releaseOutput = () => {};
 window.releaseSources = () => {};
 window.localFetch = async (...args) => { await ensureEngine(); return window.localFetch(...args); };
 import './motion.js';
+import './mobile-nav.js';
 import './i18n.js';
 import './select.js';
 import './app.js';

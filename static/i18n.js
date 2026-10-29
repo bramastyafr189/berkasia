@@ -49,13 +49,14 @@ const fragments = [
   ['PDF diubah menjadi gambar; teks tidak lagi dapat dipilih.','The PDF was converted to images; text is no longer selectable.'],
   [' total · Klik untuk mengganti file',' total · Click to change files']
 ];
+Object.assign(dictionary, {'Pulihkan':'Restore','Tukar versi':'Swap version','Dihapus dari hasil':'Excluded from output'});
 let language = localStorage.getItem('berkasia-language') === 'en' ? 'en' : 'id';
 const nodes = new WeakMap();
 function english(value) {
   const whitespace = value.match(/^(\s*)(.*?)(\s*)$/s); if (!whitespace) return value;
   let text = whitespace[2]; if (!text) return value;
   if (dictionary[text]) return whitespace[1] + dictionary[text] + whitespace[3];
-  text = text.replace(/^Berkurang (\d+)%$/, 'Reduced by $1%').replace(/^Bertambah (\d+)%$/, 'Increased by $1%').replace(/^(\d+) file dipilih$/, '$1 files selected').replace(/^(\d+) halaman$/, '$1 pages').replace(/^Halaman (\d+)$/, 'Page $1').replace(/^Pratinjau halaman (\d+)$/, 'Preview of page $1').replace(/^Halaman sumber (\d+)$/, 'Source page $1').replace(/^Memproses (\d+) dari (\d+)…$/, 'Processing $1 of $2…').replace(/^(Pindah ke kiri|Pindah ke kanan|Putar|Duplikat|Ganti|Hapus) halaman (\d+)$/, (_, action, number) => `${dictionary[action]} page ${number}`);
+  text = text.replace(/^Berkurang (\d+)%$/, 'Reduced by $1%').replace(/^Bertambah (\d+)%$/, 'Increased by $1%').replace(/^(\d+) file dipilih$/, '$1 files selected').replace(/^(\d+) halaman$/, '$1 pages').replace(/^Halaman (\d+)$/, 'Page $1').replace(/^Pratinjau halaman (\d+)$/, 'Preview of page $1').replace(/^Halaman sumber (\d+)$/, 'Source page $1').replace(/^Memproses (\d+) dari (\d+)…$/, 'Processing $1 of $2…').replace(/^(Pindah ke kiri|Pindah ke kanan|Putar|Duplikat|Ganti|Hapus|Pulihkan|Tukar versi) halaman (\d+)$/, (_, action, number) => `${dictionary[action]} page ${number}`);
   for (const [from, to] of fragments) text = text.replace(from, to);
   return whitespace[1] + text + whitespace[3];
 }

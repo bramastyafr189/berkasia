@@ -111,9 +111,21 @@ downloadAll.addEventListener('click', async () => {
   finally { downloadAll.disabled = false; downloadAll.innerHTML = 'Unduh semua sebagai ZIP <span>↓</span>'; }
 });
 
+const toolNav = document.querySelector('.nav');
+function updateNavIndicator(button = toolNav.querySelector('.nav-item.active')) {
+  if (!button) return;
+  toolNav.style.setProperty('--nav-active-left', `${button.offsetLeft}px`);
+  toolNav.style.setProperty('--nav-active-width', `${button.offsetWidth}px`);
+}
+const navResizeObserver = new ResizeObserver(() => updateNavIndicator());
+toolNav.querySelectorAll('.nav-item').forEach(button => navResizeObserver.observe(button));
+updateNavIndicator();
+
 document.querySelectorAll('.nav-item').forEach(button => button.addEventListener('click', () => {
   const tool = button.dataset.tool;
   if (button.classList.contains('active')) return;
+  toolNav.dataset.active = tool;
+  updateNavIndicator(button);
   document.querySelectorAll('.nav-item').forEach(item => { item.classList.toggle('active', item === button); if (item === button) item.setAttribute('aria-current', 'page'); else item.removeAttribute('aria-current'); });
   document.querySelector('#file-workspace').hidden = tool === 'pdf';
   document.querySelector('#pdf-workspace').hidden = tool !== 'pdf';

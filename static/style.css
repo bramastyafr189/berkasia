@@ -159,3 +159,46 @@ dialog p{color:#566b53}
 .pdf-toolbar-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
 .pdf-toolbar-actions .small-button:disabled{opacity:.5;cursor:not-allowed}
 @media(max-width:600px){.pdf-toolbar-actions{justify-content:flex-start}.pdf-toolbar-actions .small-button{min-height:40px}}
+/* Keep mobile tool tabs grouped and evenly sized in both languages. */
+@media (max-width: 600px) {
+  .header { row-gap: 12px; }
+  .nav { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3px; padding: 4px; border: 1px solid #dfe9d9; border-radius: 12px; background: #edf3e9; }
+  .nav-item { min-width: 0; min-height: 44px; padding: 8px 4px; border-radius: 8px; text-align: center; white-space: nowrap; font-size: 12px; }
+  .nav-item.active { background: #fff; color: #234b34; box-shadow: 0 2px 7px #234b3414; }
+  .nav-item:focus-visible { outline-offset: -2px; }
+}
+.nav-item{min-height:44px}
+@media (max-width: 320px) { .nav-item { font-size: 11px; padding-inline: 2px; } }
+/* Mobile navigation stays within thumb reach and leaves the header uncluttered. */
+.nav-icon{display:none}
+@media(max-width:600px){
+  .header{animation:none!important;transform:none!important;min-height:68px;padding-top:12px;padding-bottom:12px;row-gap:0}
+  .nav{position:fixed;z-index:50;left:16px;right:16px;bottom:calc(12px + env(safe-area-inset-bottom, 0px));width:auto;max-width:440px;margin:auto;padding:5px;gap:3px;border:1px solid #dce8d6;border-radius:19px;background:rgba(249,252,247,.97);box-shadow:0 10px 36px rgba(30,63,38,.16),0 2px 8px rgba(30,63,38,.08);opacity:1;transform:translateY(0);transition:transform .42s cubic-bezier(.22,1,.36,1),opacity .28s ease}
+  .nav.nav--hidden{transform:translateY(calc(100% + 30px + env(safe-area-inset-bottom, 0px)));opacity:0;pointer-events:none}
+  .nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:60px;padding:7px 4px;border-radius:14px;font-size:11px;line-height:1.2}
+  .nav-icon{display:block;width:20px;height:20px;flex:none}
+  .nav-item.active{background:#e5f2d9;box-shadow:none;color:#254c32}
+  footer{padding-bottom:calc(95px + env(safe-area-inset-bottom, 0px))}
+}
+@media(max-width:320px){.nav{left:10px;right:10px}.nav-item{font-size:10px}}
+/* Sliding capsule on mobile; only the background moves between tools. */
+@media(max-width:600px){
+  .nav{border-radius:999px;isolation:isolate}
+  .nav::before{content:'';position:absolute;z-index:0;left:5px;top:5px;width:calc((100% - 16px) / 3);height:calc(100% - 10px);border-radius:999px;background:#e5f2d9;pointer-events:none;transform:translateX(0);transition:transform .58s cubic-bezier(.22,1,.36,1)}
+  .nav[data-active="convert"]::before{transform:translateX(calc(100% + 3px))}
+  .nav[data-active="pdf"]::before{transform:translateX(calc(200% + 6px))}
+  .nav-item{position:relative;z-index:1;border-radius:999px;background:transparent}
+  .nav-item.active,.nav-item:hover:not(:disabled){background:transparent;box-shadow:none}
+}
+
+/* Desktop indicator follows the natural width of each menu. */
+@media(min-width:601px){
+  .nav{position:relative;isolation:isolate}
+  .nav::before{content:'';position:absolute;z-index:0;left:0;top:0;width:var(--nav-active-width, 0px);height:100%;border-radius:999px;background:#e5f2d9;pointer-events:none;transform:translateX(var(--nav-active-left, 0px));transition:transform .58s cubic-bezier(.22,1,.36,1),width .58s cubic-bezier(.22,1,.36,1)}
+  .nav-item{position:relative;z-index:1;border-radius:999px;white-space:nowrap}
+  .nav-item.active,.nav-item:hover:not(:disabled){background:transparent;box-shadow:none}
+}
+.page-card--deleted{background:#f1f3ef;border-style:dashed;color:#718071}
+.page-card--deleted .page-preview{opacity:.42;filter:grayscale(1);cursor:default}
+.page-status{width:100%;font-size:11px;color:#667a68;margin-bottom:3px}
+@media(prefers-reduced-motion:reduce){.nav::before{transition:none}}
